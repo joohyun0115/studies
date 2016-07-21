@@ -133,33 +133,58 @@ for parallel removal, and thus less contention.
 % for parallel removal, and thus less contention.
 To weaken the element order, we associate elements with intervals represented
 by pairs of timestamps.
-%To weaken the element order, we associate elements with intervals 
+%To weaken the element order, we associate elements with intervals represented
+% by pairs of timestamps.
 Interval timestamps allow our TS stack to achieve performance and scalability
 better than state-of-the-art concur-rent stacks. 
+%Interval timestamps allow our TS stack to achieve performance and scalability
+% better than state-of-the-art concurrent stacks.
 For example, we believe the elimination-backoff stack is the current world
 leader; in our experiments on x86,the TS stack outperforms it by a factor of
 two.
 
-Establishing correctness for the TS stack presents a chal-lenge for existing proof methods. The standard approach
-would be to locate linearization points, syntactic points inthe code which fix the order that methods take effect. This
-simply does not work for timestamped structures, becausethe order of overlapping push operations is fixed by the order of future pop operations. In the absence of pop opera-tions, elements can remain entirely unordered. We solve this
-with a new theorem, mechanised in the Isabelle proof assis-tant, which builds on Henzinger et al.'s aspect-oriented technique [12]. Rather than a total order, we need only generatean order from push to pop operations, and vice versa, which
-avoids certain violations. This order can be generated fromsyntactic points in the TS stack code, allowing us to show
-that it is correct. Our stack theorem is generic, not tied tothe TS stack. By generalising away from linearization points,
-it paves the way for future concurrent data-structures whichweaken internal ordering.
+Establishing correctness for the TS stack presents a challenge for existing
+proof methods. 
+%Establishing correctness for the TS stack presents a challenge for existing
+% proof methods.
+The standard approach would be to locate linearization points, syntactic points
+in the code which fix the order that methods take effect. 
+%The standard approach would be to locate linearization points, syntactic points
+% in the code which fix the order that methods take effect.
+This simply does not work for timestamped structures, because the order of
+overlapping push operations is fixed by the order of future pop operations.
+%This simply does not work for timestamped structures, because the order of
+% overlapping push operations is fixed by the order of future pop operations.
+In the absence of pop opera-tions, elements can remain entirely unordered. 
+%In the absence of pop operations, elements can remain entirely unordered.
+We solve this with a new theorem, mechanised in the Isabelle proof assis-tant,
+which builds on Henzinger et al.'s aspect-oriented technique. 
+%We solve this with a new theorem, mechanised in the Isabelle proof assistant, 
+Rather than a total order, we need only generatean order from push to pop
+operations, and vice versa, which avoids certain violations. 
+%Rather than a total order, we need only generatean order from push to pop
+% operations, and vice versa, which avoids certain violations.
+This order can be generated from syntactic points in the TS stack code, allowing
+us to show that it is correct. 
+%This order can be generated from syntactic points in the TS stack code, 
+Our stack theorem is generic, not tied tothe TS stack. 
+By generalising away from linearization points, it paves the way for future
+concurrent data-structures whichweaken internal ordering.
 
 Contribution. To summarise, our contributions are:
 
-* A new class of data-structure based on timestamping,realised as a stack, queue, and deque.
+* A new class of data-structure based on timestamping,realised as a stack,
+queue, and deque.
 
-* A new optimisation strategy, interval timestamping,which exploits the weak ordering permitted by timestamped data-structures.*
-A new proof technique for establishing the linearizabilityof concurrent stacks, and a mechanisation of the core
+* A new optimisation strategy, interval timestamping,which exploits the weak
+ordering permitted by timestamped data-structures.* A new proof technique for
+establishing the linearizabilityof concurrent stacks, and a mechanisation of
+the core
 
-theorem in Isabelle.*
-A detailed application of this proof technique to showthat the TS stack is linearizable with respect to its
-
-sequential specification.*
-An experimental evaluation showing our TS stack out-performs the best existing concurrent stacks.
+theorem in Isabelle.* A detailed application of this proof technique to showthat
+the TS stack is linearizable with respect to its sequential specification.*
+An experimental evaluation showing our TS stack out-performs the best existing
+concurrent stacks.
 
 Artifacts. We have produced two research artifacts:
 
@@ -171,22 +196,6 @@ Both artifacts are included with the supplementary materialon the ACM digital li
 TS stack webpage:
 
 http://scal.cs.uni-salzburg.at/tsstack/
-
-!"#$%&'(
-!" # $ %&'()( * + ,
-
----
-
-%./ )(0% )(0% )(0% )(0%
-!1 2 $%./ )(0%
-
-!, & ! 3 1%./ )(0% )(0%
-
-!) %./
-
-- - -
-
-4/5..64
 
 Figure 2: The TS stack data-structure.
 Paper structure. $2 describes the key ideas behind theTS stack, then in $3 we describe the algorithm in detail. In
@@ -220,15 +229,13 @@ a cost through cache contention. However, our experimentsshow that this can be l
 a single location with an opportunistic compare-and-swapapproach. In our experiments, we mitigate contention and
 thereby improve performance by introducing a small NOP
 
-234
-
 delay to the pop search loop. However, even without thisoptimisation, the TS stack outperforms the EB stack by a
 factor of two.We have experimented with various implementations for
 timestamping itself. Most straightforwardly, we can use astrongly-synchronised fetch-and-increment counter. We can
 avoid unnecessary increments by using a compare-and-swapto detect when the counter has already been incremented.
 We can avoid strong synchronisation entirely by using avector of thread-local counters, meaning the counter may
 stutter (many elements get the same timestamp). We canalso use a hardware timestamping operation - for example the RDTSCP instruction which is available on all modernx86 hardware. Our benchmarks show that hardware timestamping provides the best push performance. However, thepicture is more complicated in the presence of optimisation.
-See $6 for our experiments.
+See 6 for our experiments.
 Optimisations. Timestamping enables several optimisa-tions of the TS stack, most importantly elimination (a standard strategy in the literature), and interval timestamping(a contribution of this paper).
 
 In a stack, a concurrent push and pop can always soundlyeliminate each other, irrespective of the state of the stack [9].
@@ -242,7 +249,7 @@ we define timestamps as intervals, represented by a pairof start and end times. 
 are considered unordered, and thus there can be many topelements in the stack. To implement this, the algorithm includes a delay for a predetermined interval after generatinga start timestamp, then generates an end timestamp.
 
 Pausing allows us to trade off the performance of pushand pop: an increasing delay in insertion can reduce the
-number of retries in pop (for evidence see $6.2). Thoughpausing may appear as an unnecessary overhead to a push,
+number of retries in pop (for evidence see 6.2). Thoughpausing may appear as an unnecessary overhead to a push,
 our experiments show that optimal delay times (4 us - 8 us)are actually shorter than e.g. an atomic fetch-and-inc on
 a contended memory location. By weakening the order ofstored elements, interval timestamping can substantially
 increase overall throughput and decrease the latency of pops.Similarly, although interval timestamping increases the
@@ -250,30 +257,12 @@ non-determinism of removal (i.e. the variance in the or-der in which pushed elem
 translate into greater overall non-determinism comparedto other high-performance stacks. A major source of nondeterminism in existing concurrent data-structures is in factcontention [7]. While interval timestamping increases the potential for non-determinism in one respect, it decreases it inanother.
 
 Performance vs. Elimination-Backoff stack. To thebest of our knowledge the Elimination-Backoff (EB) stack [9]
-is the fastest stack previously proposed. In our experiments($6.1) the TS stack configured with elimination and interval
+is the fastest stack previously proposed. In our experiments(6.1) the TS stack configured with elimination and interval
 timestamping outperforms the EB stack by a factor of two.Several design decisions contribute to this success. The lack
 of insert-contention and mitigation of contention in the
 
-!"#$%&'
-!"#$%('
-
-!)!%'\Gamma &
-!)!%'\Gamma (
-*+#
-
-,&-
-*.
-
-,&-
-
-./0
-
-!.1\Delta 
-2.&+#*2*,/1*.
-!.1\Delta 
-2.&+#*2*,/1*.
-
 Figure 3: Non-LIFO behaviour forbidden by stack theorem.
+
 remove makes our stack fast even without elimination. Also,timestamping allows us to integrate elimination into normal
 stack code, rather than in separate back-off code.
 Algorithm correctness. Intuitively, the TS stack is cor-rect because any two push operations that run sequentially
@@ -311,18 +300,17 @@ a inserted by push was in a SP pool whenthe pop started, and so could have been 
 
 1 Additionally, the full theorem requires the algorithm is linearizable with respect to sequential set semantics. This guaranteesnon-LIFO properties such as absence of duplication.
 
-235
-
 * rr (for `remove-remove'). Two operations pop()!a andpop()!
 
 b are ordered in rr if elements a and b are removedin order from the underlying SP pools.
 
 Building ir is more than just merging these two relationsbecause they may contradict one another. Instead, ir is built
-by taking vis as a core, and using rr to correct cases thatcontradict LIFO order. Our proof of correctness ($5) shows
+by taking vis as a core, and using rr to correct cases thatcontradict LIFO order. Our proof of correctness (5) shows
 that this is always possible, which establishes that the TSstack is linearizable.
 
 3. The TS Stack in Detail
-We now present our TS stack algorithm in detail. Listing 1shows the TS stack code. This code manages the collection
+We now present our TS stack algorithm in detail. 
+Listing 1shows the TS stack code. This code manages the collection
 
 of thread-specific SP pools linked from the array spPools.We factor the SP pool out as a separate data-structure
 supporting the following operations:
@@ -357,77 +345,6 @@ and can be eliminated immediately (lines 46-47).To check whether the stack is em
 
 Listing 1: TS stack algorithm. The SP pool is defined inListing 2 and described in $3.1, timestamps are discussed
 in $3.2. The gray highlighted code deals with the emptinesscheck and elimination.
-
-1 TSStack {2 Node {
-3 Element element ,4 Timestamp timestamp ,
-5 Node next ,6 Bool taken
-7 };8
-9 SPPool [ maxThreads ] spPools ;10
-11 v oid push ( Element element ){12 SPPool pool = spPools [ threadID ];
-13 Node node = pool . insert ( element );14 Timestamp timestamp = newTimestamp ();
-15 node . timestamp = timestamp ;16 }
-1718 Element pop (){
-19 // Elimination20 Timestamp startTime = newTimestamp ();
-21 Bool success ;22 Element element ;
-23 do{24 <success , element >= tryRem ( startTime );
-25 } w h i l e (! success );26 r e t u r n element ;
-27 }28
-29 <Bool , Element > tryRem ( Timestamp startTime ){30 Node youngest = NULL ;
-31 Timestamp timestamp = -1;32 SPPool pool ;
-33 Node top ;34 Node [ maxThreads ] empty ;
-35 f o r each ( SPPool current in spPools ){36 Node node ;
-37 Node poolTop ;38 <node , poolTop >= current . getYoungest ();
-39 // Emptiness check40 i f ( node == NULL ){
-41 empty [ current .ID ]= poolTop ;42 c o n t i n u e ;
-43 }44 Timestamp nodeTimestamp = node . timestamp ;
-45 // Elimination46 i f ( startTime
-
-<TS nodeTimestamp )47 r e t u r n current . remove ( poolTop , node );
-
-48 i f ( timestamp <TS nodeTimestamp ){49 youngest = node ;
-50 timestamp = nodeTimestamp ;51 pool = current ;
-52 top = poolTop ;53 }
-54 }55
-
-// Emptiness check56 i f ( youngest == NULL ){
-
-57 f o r each ( SPPool current in spPools ){58 i f ( current . top != empty [ current .ID ])
-59 r e t u r n <false ,NULL >;60 }
-61 r e t u r n <true ,EMPTY >;62 }
-63 r e t u r n pool . remove (top , youngest );64 }
-65 }
-
-236
-
-Listing 2: SP pool algorithm. The gray highlighted codedeals with the unlinking of taken nodes.
-66 SPPool {67 Node top ;
-68 Int ID; // The ID of the owner thread.69
-70 init (){71 Node sentinel =
-72 createNode ( element =NULL , taken = true );73 sentinel . next = sentinel ;
-74 top = sentinel ;75 }
-7677 Node insert ( Element element ){
-78 Node newNode =79 createNode ( element = element , taken = false );
-80 newNode . next = top ;81 top = newNode ;
-82 Node next = newNode . next ; // Unlinking83 w h i l e (next -> next != next && next . taken )
-84 next = next -> next ;85 newNode . next = next ;
-86 r e t u r n newNode ;87 }
-8889 <Node ,Node > getYoungest (){
-90 Node oldTop = top ;91 Node result = oldTop ;
-92 w h i l e ( true ){93 i f (! result . taken )
-94 r e t u r n <result , oldTop >;95 e l s e i f ( result . next == result )
-96 r e t u r n <NULL , oldTop >;97 result = result . next ;
-98 }99 }
-100101 <Bool , Element > remove ( Node oldTop , Node node ){
-102 i f ( CAS ( node .taken , false , true )){103 CAS (top , oldTop , node );
-
-// Unlinking104 // Unlink nodes before node in the list.
-
-105 i f ( oldTop != node )106 oldTop . next = node ;
-107 // Unlink nodes after node in the list.108 Node next = node . next ;
-109 w h i l e (next -> next != next && next . taken )110 next =next -> next ;
-111 node . next = next ;112 r e t u r n <true , node . element >;
-113 }114 r e t u r n <false ,NULL >;
-115 }116 }
 
 3.1 SP Pool
 The SP pool (Listing 2) is a singly linked list of nodesaccessed by a top pointer. A node consists of a next pointer
@@ -476,29 +393,8 @@ increments it by one, stores it in its thread-local counter,and returns the stor
 that the TS-stutter algorithm does not require strong syn-chronization. TS-stutter timestamping may return the same
 timestamp multiple times, but only if these timestamps weregenerated concurrently.
 
-237
-
-Listing 3: TS-CAS algorithm. The gray highlighted code isan optimisation to avoid unnecessary CAS.
-117 TS_cas {118 i n t counter =1;
-119120 Timestamp newTimestamp (){
-121 i n t timestamp = counter ;122 pause (); // delay optimisation .
-123 i n t timestamp2 = counter ;124 i f ( timestamp != timestamp2 )
-125 r e t u r n [ timestamp , timestamp2 -1];126 i f ( CAS ( counter , timestamp , timestamp +1))
-127 r e t u r n [ timestamp , timestamp ];128 r e t u r n [ timestamp , counter -1];
-129 }130 }
-
 TS-interval: This algorithm does not return one time-stamp value, but rather an interval consisting of a pair of
 timestamps generated by one of the algorithms above. Let[
-
-a, b] and [c, d] be two such interval timestamps. They areordered [
-
-a, b] <TS [c, d] if and only if b < c. That is, if thetwo intervals overlap, the timestamps are unordered. The
-
-TS-interval algorithm is correct because for any two intervaltimestamps [
-
-a, b] and [c, d], if these intervals are generatedsequentially, then
-
-b is generated before c and therefore b < c,as discussed above.
 
 In our experiments we use the TS-hardware algorithm(i.e. the x86 RDTSCP instruction) to generate the start and
 end of the interval, because it is faster than TS-atomic andTS-stutter. Adding a delay between the generation of the
@@ -568,25 +464,7 @@ information to choose a linearization order. However, if theelements are later p
 on the earlier pushes. Worse, ordering two pushes can im-plicitly order other methods, leading to a cascade of linearizations back in time.Consider the following history. Horizontal lines represent
 execution time, !| represents calls, and "| returns.
 
-!"#$%!& !'!%&\Gamma "!"#$%"&
-
-!'!%&\Gamma !!"#$%#& !'!%&\Gamma #
-
 This history induces the precedence order pr represented bysolid lines in the following graph.
-
-!"#$%!& !'!%&\Gamma "!"#$%"&
-
-!'!%&\Gamma !!"#$%#& !'!%&\Gamma # %(&
-%)&%*& %+&
-!, !,
-
-!,
-
-!,
-
-!,
-
-!,
 
 First consider the history immediately before the return ofpop()!
 
@@ -711,51 +589,6 @@ removed in order.Intuitively, our theorem seems close to the lower bound
 for stack ordering. The next section ($4.2) provides evidencefor this by ruling out the class of weaker formulations without ir. Intuitively, we would expect any concurrent stack toenforce orders as strong as the ones in our theorem. Thus,
 Theorem 1 points towards fundamental constraints on thestructure of concurrent stacks.
 
-!"!#$\Gamma !
-!"!#$\Gamma "!%&'#"$
-
-!"!#$\Gamma #
-
-!"!#$\Gamma $
-!%&'##$
-
-!%&'#$$
-
-!%&'#!$
-
-!"#$%!&
-!'!%&\Gamma !
-
-()*
-
-!'!%&\Gamma "!'!%&\Gamma #
-
-!"#$%#&
-
-!'!%&\Gamma $
-
-!"#$%$&
-()*
-
-!"#$%"&
-()* ()*
-*+,
-
-!-
-
-!-
-
-*+,
-!-
-
-!-
-
-*+,
-!-
-
-!-
-
-!-
 Figure 4: Top: example non-linearizable execution exhibitingnon-local behaviour. Bottom: corresponding graph projecting out pr, val, and lin relations.
 
 Mechanisation. We have mechanised Theorem 1 in theIsabelle theorem prover. The source files for this proof are
@@ -1069,212 +902,6 @@ the same delay as in the high-contention producer-consumerbenchmark, see Table 1
 Figure 5c and Figure 5d show the performance and scala-bility of the data-structures in the high-contention produceronly benchmark. The push performance of the TS-hardwarestack is significantly better than the push of the other stack
 implementations. With an increasing number of threads thepush operation of the TS-interval stack is faster than the
 
-243
-
-T\Gamma \Delta \Theta \Lambda \Delta \Gamma  \Xi \Pi \Sigma \Upsilon \Phi 
-
-E\Psi  \Xi \Pi \Sigma \Upsilon \Phi 
-
-T\Xi \Omega \Sigma \Pi fffi\Theta \Upsilon  \Xi \Pi \Sigma \Upsilon \Phi 
-
-T\Xi \Omega flffi\Xi  \Xi \Pi \Sigma \Upsilon \Phi 
-
-T\Xi \Omega ffl\Sigma \Gamma ij\Sigma \Gamma \Delta  \Xi \Pi \Sigma \Upsilon \Phi 
-
-T\Xi \Omega \Theta `\Pi \Delta \Gamma '\Sigma ^ \Xi \Pi \Sigma \Upsilon \Phi 
-
-T\Xi \Omega *\Pi _\Pi \Pi \Delta \Gamma  \Xi \Pi \Sigma \Upsilon \Phi 
-
-
-*
-,
-ss
-ae
-oe
-oe*
-
-* oe * 3 , 5 ss 7 ae
-oo/
-AEOE
-O/!"
-
-o#
-$o/
-
-AEOE
-%$
-
-&%
-oOE
-AE"
-
-$'
-
-AE!!
-AEOE
-(
-
-n)*+,- ./ 01-,246
-(a) Producer-consumer benchmark, 40-core machine.
-
-8
-9888
-:888
-;888
-!888
-=8888
-=9888
-
-9 ! =; 9: ?9 :8 :! ?; ;:
-@A
-BC
-DFG
-
-@H
-IA
-
-BC
-JI
-
-KJ
-@C
-BG
-
-IL
-
-BFF
-BC
-M
-
-NOPQRS UV WXSRYZ[
-(b) Producer-consumer benchmark, 64-core machine.
-
-"
-]""""
-^""""
-.""""
-`""""
-a""""
-b""""
-
-] ]" ^" ." `" a" b" c" d"
-ef
-gh
-ijk
-
-el
-mf
-
-gh
-p
-mq
-
-pe
-
-hg
-km
-rg
-jjg
-hs
-
-tuvwxy z- --""yx~"A*
-(c) Producer-only benchmark, 40-core machine.
-
-A,
-C'A,A,A,A,
-C^A,A,A,A,
-D^A,A,A,A,
-E^A,A,A,A,
-E,A,A,A,A,
-G*A,A,A,A,
-
-C' L' C'G* C^E^ D^C^ E^A, E^L' E,G* G*E^
-L^L/
-N'N^
-NGO""R'
-
-L^R^
-S'L/
-
-N'N^
-S^
-S'S,
-
-S^L^
-
-N^N'
-R'S'
-T^N'
-O""O""N'
-N^T,
-
-U""U*Y"Z'Z^Z. IJI. d-$Z.Z^a*a,c'
-(d) Producer-only benchmark, 64-core machine.
-
-c^
-d^c^c^
-e^c^c^c^
-e^d^c^c^
-e,c^c^c^
-e,d^c^c^
-g*c^c^c^
-g*d^c^c^
-
-e^ e^c^ e,c^ g*c^ l'c^ d^c^ l^c^ l/c^ n'c^
-n^ng
-o""r'
-r^s's^
-
-n^s,
-t^ng
-
-o""r'
-t,t^
-
-u""t,
-n^r'
-o""s^
-
-t^u*
-
-o""s'
-s'o""
-r'y"
-
-z'z^z.ij!? #A` A'A^?!A~A"A*
-(e) Consumer-only benchmark, 40-core machine.
-
-AE
-C,AEAE
-E`AEAEAE
-E`C,AEAE
-E'AEAEAE
-E'C,AEAE
-E^AEAEAE
-E^C,AEAE
-
-E` E" E`I` E'I' E^E' I'AE I'E" C,I` I`I'
-I^I"
-DHN~
-O`O'O^
-
-I^O~
-O"I"
-
-DHN~
-OEO"
-
-O/OE
-I^N~
-DHO^
-
-O"U`
-
-DHO'
-O'DH
-N~U'
-
-U^U"Y'ThSSa` a'a^ a~a"a`SSa*aec,
 (f) Consumer-only benchmark, 64-core machine.
 
 Figure 5: TS stack performance in the high-contention scenario on 40-core machine (left) and 64-core machine (right).
@@ -1294,78 +921,6 @@ elements share timestamps and therefore can be removed inparallel. The TS-atomic
 the same performance because all elements have uniquetimestamps and therefore have to be removed sequentially.
 Also in the Treiber stack and the EB stack elements have tobe removed sequentially. Depending on the machine, removing elements sequentially from a single list (Treiber stack)is sometimes less and sometimes as expensive as removing
 elements sequentially from multiple lists (TS stack).
-
-244
-
-
-\Gamma 
-\Delta 
-\Theta 
-\Lambda 
-\Xi 
-\Xi \Gamma 
-
- 3 \Theta  9 \Xi \Gamma  \Xi 1
-
-
-
-\Xi 
-\Gamma 
-3
-
-\Delta 
-1
-\Theta 
-\Pi 
-
-o\Sigma 
-\Upsilon \Phi 
-\Psi \Omega 
-ffo
-fifl
-
-\Sigma \Upsilon 
-\Phi ffi
-
-fl
-fflffi
-
-o\Phi 
-\Upsilon 
-fffl
-
-i\Upsilon 
-\Omega \Omega \Upsilon 
-\Phi j
-
-fin
-ffi
-i\Upsilon 
-
-\Phi o
-`\Phi 
-
-\Upsilon \Omega 
-\Phi ff\Upsilon 
-
-fl
-ffl'\Upsilon 
-
-flfl
-
-fffl
-i\Upsilon 
-\Omega \Omega \Upsilon 
-\Phi j
-
-d^*_* ,ss ssae
-
-P^oeo/AEoeOE_ssO/^ !"#,ss$^oe%_* "$_O/&
-
-R^$oe,^ae !"#,ss$^oe%_* "$_O/&
-P^oeo/AEoeOE_ssO/^ !"#'(" "$_O/&
-
-R^$oe,^ae !"#'(" "$_O/&
 
 Figure 6: High-contention producer-consumer benchmarkusing TS-interval and TS-CAS timestamping with increasing delay on the 40-core machine, exercising 40 producersand 40 consumers.
 
