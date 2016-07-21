@@ -15,7 +15,8 @@ current systems.
 1 Introduction
 
 Most dynamic Web sites today maintain large server-side databases, to which
-their users have limited access via HTTP interfaces. 
+their users have limited access via HTTP interfaces.
+%Most dynamic Web sites today maintain
 Keeping this data hidden and correctis critical yet difficult. 
 Indeed, headlines are replete with stories of the damage and embarrassment
 remote attackers can visit on large Web sites.
@@ -31,113 +32,171 @@ coarse-grained database-level permission systems for access control.
 
 Web servers also tend to package logically separate programs into one address
 space.
-If a particular Web site serves its search and newsletter-subscribe fea-tures from the same machine, a bug in the former might allow a malicious remote client to select all rows froma table of subscribers' email addresses. In general, anything from a buffer overrun to an unexpected escape se-quence can expose private data to an attacker. Moreover,
-few practical isolation schemes exist aside from runningdifferent services on different machines. As a result, a
-flaw in one service can ripple through an entire system.
+If a particular Web site serves its search and new sletter-subscribe features
+from the same machine, a bug in the former might allow a malicious remote
+client to select all rows from a table of subscribers' email addresses. 
+In general, anything from a buffer overrun to an unexpected escape sequence can
+expose private data to an attacker. 
+Moreover, few practical isolation schemes exist aside from running different
+services on different machines. 
+As a result, a flaw in one service can ripple through an entire system.
 
-To plug the many security holes that plague existing
-
-Web servers, and to limit the severity of unforeseen prob-lems, we introduce OKWS, the OK Web Server. Unlike
-typical Web servers, OKWS is specialized for dynamiccontent and is not well-suited to serving files from disk.
-It relies on existing Web servers, such as Flash [23] orApache [3], to serve images and other static content. We
-argue (in Section 5.4) that this separation of static anddynamic content is natural and, moreover, contributes to
-security.What OKWS does provide is a simple, powerful, and
-secure toolkit for building dynamic content pages (alsoknown as
-
-Web services). OKWS enforces the naturalprinciple of
-
-least privilege [27] so that those aspects ofthe system most vulnerable to attack are the least useful to attackers. Further, OKWS separates privileges sothat the different components of the system distrust each
-other. Finally, the system distrusts the Web service devel-oper, presuming him a sloppy programmer whose errors
-can cause significant damage. Though these principlesare not novel, Web servers have not generally incorporated them.Using OKWS to build Web services, we show that
-compromises among basic security principles, perfor-mance, and usability are unnecessary. To this effect,
-the next section surveys and categorizes attacks on Webservers, and Section 3 presents simple design principles
-that thwart them. Section 4 discusses OKWS's imple-mentation of these principles, and Section 5 argues that
-the resulting system is practical for building large sys-tems. Section 6 discusses the security achieved by the
-implementation, and Section 7 analyzes its performance,showing that OKWS's specialization for dynamic content
-helps it achieve better performance in simulated dynamicworkloads than general purpose servers.
+To plug the many security holes that plague existing Web servers, and to limit
+the severity of unforeseen problems, we introduce OKWS, the OK Web Server. 
+Unlike typical Web servers, OKWS is specialized for dynamiccontent and is not
+well-suited to serving files from disk.
+It relies on existing Web servers, such as Flash [23] orApache [3], to serve
+images and other static content. 
+We argue (in Section 5.4) that this separation of static anddynamic content is
+natural and, moreover, contributes to security.
+What OKWS does provide is a simple, powerful, and secure toolkit for building
+dynamic content pages (alsoknown as Web services). OKWS enforces the
+naturalprinciple of least privilege [27] so that those aspects ofthe system most
+vulnerable to attack are the least useful to attackers.
+Further, OKWS separates privileges sothat the different components of the system
+distrust each other.
+Finally, the system distrusts the Web service developer, presuming him a sloppy
+programmer whose errors can cause significant damage.
+Though these principles are not novel, Web servers have not generally
+incorporated them.
+Using OKWS to build Web services, we show that compromises among basic security
+principles, perfor-mance, and usability are unnecessary.
+To this effect, the next section surveys and categorizes attacks on Webservers,
+and Section 3 presents simple design principles that thwart them.
+Section 4 discusses OKWS's imple-mentation of these principles, and Section 5
+argues that the resulting system is practical for building large systems.
+Section 6 discusses the security achieved by the implementation, and Section 7
+analyzes its performance,showing that OKWS's specialization for dynamic content
+helps it achieve better performance in simulated dynamicworkloads than general
+purpose servers.
 
 2 Brief Survey of Web Server Bugs
-To justify our approach to dynamic Web server design,we briefly analyze the weaknesses of popular software
 
-packages. Our goal is to represent the range of bugs thathave arisen in practice. Historically, attackers have exploited almost all aspects of conventional Web servers,from core components and scripting language extensions to the scripts themselves. The conclusion we drawis that a better design--as opposed to a more correct
-implementation--is required to get better security prop-erties.
+To justify our approach to dynamic Web server design, we briefly analyze the
+weaknesses of popular software packages. 
+Our goal is to represent the range of bugs thathave arisen in practice.
+Historically, attackers have exploited almost all aspects of conventional Web
+servers,from core components and scripting language extensions to the scripts
+themselves. 
+The conclusion we draw is that a better design as opposed to a more correct
+implementation is required to get better security properties.
 
-In our survey, we focus on the Apache [3] server dueto its popularity, but the types of problems discussed are
-common to all similar Web servers, including IBM Web-Sphere [14], Microsoft IIS [19] and Zeus [47].
+In our survey, we focus on the Apache [3] server dueto its popularity, but the
+types of problems discussed are common to all similar Web servers, including
+IBM Web-Sphere [14], Microsoft IIS [19] and Zeus [47].
 
 2.1 Apache Core and Standard Modules
-There have been hundreds of major bugs in Apache'score and in its standard modules. They fit into the following categories:
 
-Unintended Data Disclosure. A class of bugs resultsfrom Apache delivering files over HTTP that are supposed to be private. For instance, a 2002 bug in Apache's
-m\Gamma \Delta  \Delta d\Theta  reveals source code of user-written scripts [42].A recent discovery of leaked file descriptors allows remote users to access sensitive log information [7]. OnMac OS X operating systems, a local find-by-content indexing scheme creates a hidden yet world-readable filecalled
+There have been hundreds of major bugs in Apache'score and in its standard
+modules. 
 
-.\Lambda \Xi \Pi \Sigma \Upsilon \Delta \Phi \Psi  in each directory indexed. Versionsof Apache released in 2002 expose this file to remote
+They fit into the following categories:
+Unintended Data Disclosure. A class of bugs results from Apache delivering files
+over HTTP that are supposed to be private. 
+For instance, a 2002 bug in Apache's reveals source code of user-written
+scripts [42].
+A recent discovery of leaked file descriptors allows remote users to access
+sensitive log information [7]. 
+On Mac OS X operating systems, a local find-by-content indexing scheme creates
+a hidden yet world-readable file called.
+in each directory indexed.
+Versions of Apache released in 2002 expose this file to remote clients [41].
+In all cases, attackers can use knowledge about local configuration and
+custom-written application code to mount more damaging attacks.
 
-clients [41]. In all cases, attackers can use knowledgeabout local configuration and custom-written application
-code to mount more damaging attacks.
+Buffer Overflows and Remote Code Execution.
+Buffer overflows in Apache and its many modules are common.
+Unchecked boundary conditions found recently in dff and regular expression code
+allow local attack [39].
 
-Buffer Overflows and Remote Code Execution.Buffer overflows in Apache and its many modules are
-common. Unchecked boundary conditions found re-cently in
+In 2002, a common Apache deployment with OpenSSL had a critical bug in client
+key negotiation, allowing remote attackers to execute arbitrary code with the
+permissions of the Webserver.
+The attacking code downloads, compiles and executes a program that seeks to
+infect other machines [36].
 
-m\Gamma \Delta  da\Omega dff and m\Gamma \Delta  r\Phi fir\Omega fl\Phi  regular expres-sion code allow local attack [39]. In 2002, a common
+There have been less-sophisticated attacks that re-sulted in arbitrary remote
+code execution.
+Some Windows versions of Apache execute commands in URLs that follow pipe
+characters (`ffiffl).
+A remote attacker can therefore issue the command of his choosing from an
+unmodified Web browser [40].
+On MS-DOS-based sys-tems, Apache failed to filter out special device names,
+allowing carefully-crafted HTTP POST requests to exe-cute arbitrary code [43].
+Other problems have occurred when site developers call Apache's hfl fffl
+utilityfrom within CGI scripts to manage HTTP user authentication [6].
 
-Apache deployment with OpenSSL had a critical bugin client key negotiation, allowing remote attackers to
-execute arbitrary code with the permissions of the Webserver. The attacking code downloads, compiles and executes a program that seeks to infect other machines [36].
-
-There have been less-sophisticated attacks that re-sulted in arbitrary remote code execution. Some Windows versions of Apache execute commands in URLsthat follow pipe characters (
-
-`ffiffl). A remote attacker cantherefore issue the command of his choosing from an
-
-unmodified Web browser [40]. On MS-DOS-based sys-tems, Apache failed to filter out special device names,
-allowing carefully-crafted HTTP POST requests to exe-cute arbitrary code [43]. Other problems have occurred
-when site developers call Apache's hfl\Delta \Omega i\Phi fffl utilityfrom within CGI scripts to manage HTTP user authentication [6].
-
-Denial of Service Attacks. Aside from TCP/IP-basedDoS attacks, Apache has been vulnerable to a number of
-application-specific attacks. Apache versions released in2003 failed to handle error conditions on certain "rarely
-used ports," and would stop servicing incoming connec-tions as a result [38]. Another 2003 release allowed local configuration errors to result in infinite redirectionloops [8]. In some versions of Apache, attackers could
-exhaust Apache's heap simply by sending a large se-quence of linefeed characters [37].
+Denial of Service Attacks. Aside from TCP/IP-based DoS attacks, Apache has been
+vulnerable to a number of application-specific attacks.
+Apache versions released in 2003 failed to handle error conditions on certain
+"rarely used ports," and would stop servicing incoming connections as a result
+[38].
+Another 2003 release allowed local configuration errors to result in infinite
+redirectionloops [8].
+In some versions of Apache, attackers could exhaust Apache's heap simply by
+sending a large sequence of linefeed characters [37].
 
 2.2 Scripting Extensions to Apache
-Apache's security worsens considerably when compiledwith popular modules that enable dynamically-generated
 
-content such as PHP [25]. In the past two years alone,at least 13 critical buffer overruns have been found in
-the PHP core, some of which allowed attackers to re-motely execute arbitrary code [9, 28]. In six other
-cases, faults in PHP allowed attackers to circumvent itsapplication level chroot-like environment, called "Safe
-Mode." One vulnerability exposed /\Phi flj/`dfffffi\Delta  via
-`\Gamma ff\Omega \Psi  i\Phi fl`fi\Upsilon dm [5]. Another allowed attackers to writePHP scripts to the server and then remotely execute them;
+Apache's security worsens considerably when compiled with popular modules that
+enable dynamically-generated content such as PHP [25].
+In the past two years alone, at least 13 critical buffer overruns have been
+found in the PHP core, some of which allowed attackers to remotely execute
+arbitrary code [9, 28].
+In six other cases, faults in PHP allowed attackers to circumvent its
+application level chroot-like environment, called "Safe Mode." 
+One vulnerability exposed gadm [5].
+Another allowed attackers to write PHP scripts to the server and then remotely
+execute them;
 
-this bug persisted across multiple releases of PHP in-tended as fixes [35].
+this bug persisted across multiple releases of PHP intended as fixes [35].
 
-Even if a correct implementation of PHP were possi-ble, it would still provide Web programmers with ample opportunity to introduce their own vulnerabilities. Acanonical example is that beginning PHP programmers
-fail to check for sequences such as ".." in user inputand therefore inadvertently allow remote access to sensitive files higher up in the file system hierarchy (e.g.,
-../../../\Phi flj/`dfffffi\Delta ). Similarly, PHP scripts thatembed unescaped user input inside SQL queries present
+Even if a correct implementation of PHP were possible, it would still provide
+Web programmers with ample opportunity to introduce their own vulnerabilities.
+A canonical example is that beginning PHP programmers fail to check for
+sequences such as ".." in user input and therefore in advertently allow remote
+access to sensitive files higher up in the file system hierarchy
+(e.g., ../../../\Phi flj/`dfffffi\Delta ). 
+Similarly, PHP scripts that embed unescaped user input inside SQL queries
+present openings for "SQL Injection." 
+If a PHP programmer neglects to escape user input properly, a malicious user can
+turn a benign SELECT into a catastrophic DELETE.
+The PHP manual does state that PHP scripts might be separated and run as
+different users to allow for privilege separation.
+In this case, however, PHP could not run as an Apache module, and the system
+would require a new PHP process forked for every incoming connection.
+This isolation strategy is at odds with performance.
 
-openings for "SQL Injection." If a PHP programmer ne-glects to escape user input properly, a malicious user can
-turn a benign SELECT into a catastrophic DELETE.The PHP manual does state that PHP scripts might be
-separated and run as different users to allow for privilegeseparation. In this case, however, PHP could not run as
-an Apache module, and the system would require a newPHP process forked for every incoming connection. This
-isolation strategy is at odds with performance.
 3 Design
-If we assume that bugs like the ones discussed above areinevitable when building a large system, the best remedy
 
-is to limit the effectiveness of attacks when they occur.This section presents four simple guidelines for protecting sensitive site data in the worst-case scenario, in which
-
-an adversary remotely gains control of a Web server andcan execute arbitrary commands with the Web server's
-privileges. We also present OKWS's design, which fol-lows the four security guidelines without sacrificing performance.Throughout, we assume a cluster of Web servers and
-database machines connected by a fast, firewalled LAN.Site data is cached at the Web servers and persistently
-stored on the database machines. The primary securitygoals are to prevent intrusion and to prevent unauthorized
+If we assume that bugs like the ones discussed above are inevitable when
+building a large system, the best remedy is to limit the effectiveness of
+attacks when they occur.
+This section presents four simple guidelines for protecting sensitive site data
+in the worst-case scenario, in which an adversary remotely gains control of a
+Web server and can execute arbitrary commands with the Web server's privileges.
+We also present OKWS's design, which follows the four security guidelines
+without sacrificing performance.
+Throughout, we assume a cluster of Web servers and database machines connected
+by a fast, firewalled LAN.Site data is cached at the Web servers and
+persistently stored on the database machines.
+The primary security goals are to prevent intrusion and to prevent unauthorized
 access to site data.
 
 3.1 Practical Security Guidelines
-(1) Server processes should be chrooted. After compro-mising a server process, most attackers will try to gain
 
-control over the entire server machine, possibly by in-stalling "back doors," learning local passwords or private
-keys, or probing local configuration files for errors. Atthe very least, a compromised Web server should have
-no access to sensitive files or directories. Moreover, anOS-level jail ought to hide all
-
-s\Gamma \Delta \Theta \Lambda \Xi  executables fromthe Web server, since many privilege escalation attacks
-
-require such files (examples include the ptrace and bindattacks mentioned in [17]). Privilege escalation is possible without s\Gamma \Delta \Theta \Lambda \Xi  executables but requires OS-levelbugs or race conditions that are typically rarer.
+(1) Server processes should be chrooted. 
+After compromising a server process, most attackers will try to gain control
+over the entire server machine, possibly by installing "back doors," learning
+local passwords or private keys, or probing local configuration files for
+errors. 
+At the very least, a compromised Web server should have no access to sensitive
+files or directories.
+Moreover, an OS-level jail ought to hide all executables from the Web server,
+since many privilege escalation attacks require such files (examples include the
+ptrace and bindattacks mentioned in [17]).
+Privilege escalation is possible without executables but requires OS-level bugs
+or race conditions that are typically rarer.
 
 An adversary can still do damage without control ofthe Web server machine. The configuration files, source
 files, and binaries that correspond to the currently run-ning Web server contain valuable hints about how to access important data. For instance, PHP scripts often in-clude the username and plaintext password used to gain
@@ -351,7 +410,7 @@ The okd process accepts incoming HTTP requests anddemultiplexes them based on th
 
 first lines. For example, the HTTP/1.1 standard [11] de-fines the first line of a GET request as:
 
-AEG" #habs pathi?hqueryi O/""H#^$^
+AEG" #habs pathi?hqueryi O/""H#^^
 Upon receiving such a request, okd looks up a Web ser-vice corresponding to abs path in its dispatch table. If
 
 successful, okd forwards the remote client's file descrip-tor to the requested service. If the lookup is successful
@@ -417,9 +476,10 @@ read-only (perhaps, on those platforms that support it, bymounting a read-only
 nullfs).
 
 5 OKWS In Practice
-Though its design is motivated by security goals, OKWSprovides developers with a convenient and powerful
-
-toolkit. Our experience suggests that OKWS is suitablefor building and maintaining large commercial systems.
+Though its design is motivated by security goals, OKWSprovides developers with
+a convenient and powerful toolkit.
+Our experience suggests that OKWS is suitable for building and maintaining large
+commercial systems.
 
 5.1 Web Services
 A Web developer creates a new Web service as follows:
@@ -468,34 +528,11 @@ Database proxies employ a small and static number ofworker threads and do not ex
 
 intent here is simply to overlap requests to the underlyingdata source so that it might overlap its disk accesses and
 
-v\Gamma \Delta \Theta  m\Lambda \Xi \Pi \Sigma v\Upsilon \Xi \Phi \Psi \Psi \Omega \Sigma \Gamma \Upsilon ff\Pi \Pi  (fi
--
-
-\Pi \Phi \Sigma  \Upsilon \Gamma c\Gamma \Sigma  = \Omega p\Sigma pmflffi\Upsilon \Gamma c\Gamma \Sigma ffiffli
-
-/j\Gamma 
-
-\Omega \Sigma \Delta `\Phi  (\Sigma ff\Pi \Omega fi !!'^*i
-!_\Phi mc*
-
-!_ffp\Theta *
-
-!\Phi \Delta \Phi cff*,-\Omega p\Sigma pmflffi\Phi \Delta \Phi cffffifflss!/\Phi \Delta \Phi cff*
-!/_ffp\Theta *
-'^*
-
-\Delta `\Upsilon ci\Theta ff (\Sigma ff\Pi \Omega ae ffi/"\Gamma \Theta \Lambda oe_\Phi mcffiae
-
-- C^o/^AE =* ,-\Upsilon \Gamma c\Gamma \Sigma ssssfii
-\Gamma j/
-\Gamma i\Phi \Omega i\Phi  (\Sigma ff\Pi \Omega fii
-ss
-
 Figure 3: Fragment of a Web service programmed in OKWS.
 The remote client supplies the title and color of the page via
 standard CGI-style parameter passing. The runtime templating
 system substitutes the user's choice of color for the token OEO/O/!
-in the template #$%&')*+,-. The variable ,' s.0 +tt12s3
+in the template #%&')*+,-. The variable ,' s.0 +tt12s3
 represents a buffer that collects the body of the HTTP response and then is flushed to the client via %o+3o+45. With
 the F6-+21OE78 flag set, OKWS fi lters all dangerous metacharacters from the 3919, associative array.
 
@@ -573,7 +610,7 @@ In this section we discuss OKWS's security benefits andshortcomings.
 (1) The Local Filesystem. An OKWS service has almostno access to the file system when execution reaches
 
 custom code. If compromised, a service has write accessto its coredump directory and can read from OKWS
-shared libraries. Otherwise, it cannot access $%&')*executables, the binaries of other OKWS services, or
+shared libraries. Otherwise, it cannot access *executables, the binaries of other OKWS services, or
 core dumps left behind by crashed OKWS processes. Itcannot overwrite HTTP logs or HTML templates. Other
 OKWS services such as oklogd and pubd have moreprivileges, enabling them to write to and read from the
 file system, respectively. However, as OKWS matures,these helpers should not present security risks since they
@@ -623,23 +660,8 @@ dynamic prevention of DoS attacks. Their system isapplicable within OKWS's archi
 each service to a single address space. The same cannotbe said for those systems that spread equivalent functionality across multiple address spaces.
 
 6.2 Security Shortcomings
-The current implementation of OKWS supports onlyC++ for service development. OKWS programmers
-
-!\Gamma \Delta \Theta \Lambda \Xi !\Gamma \Pi \Sigma \Upsilon \Xi !\Delta \Phi \Delta \Lambda \Pi \Xi \Psi \Pi \Omega \Delta  R\Pi \Omega ff\Lambda \Delta !fi\Delta \Phi \Delta \Lambda \Pi \Xi !fi\Gamma \Pi \Sigma \Upsilon \Xi 
-!flffi\Upsilon ffl\Xi 
-!i
-
-$\Upsilon fl = \Theta ffl\Omega m\Lambda j`'ffi^^\Pi '\Delta *_ffi*\Upsilon fl,\Lambda '\Omega ,\Theta \Phi \Delta ,\Pi \Upsilon ff_)ss
-\Theta ffl\Omega m\Lambda j\Omega \Pi \Lambda \Pi '\Delta j\Upsilon fl*_\Delta \Pi \Omega \Delta \Upsilon fl_ae $\Upsilon fl)ss
-
-$\Phi \Upsilon  = $oe\Psi \Psi o/jAEOE\Psi jO/R!"_\Phi \Upsilon _#ss
-$m%ffl = _!OE&OE'\Psi  xaeffl FR(* \Delta \Sigma fl WoeOEROE x=$\Phi \Upsilon _ss
-$%\Pi \Omega ff\Lambda \Delta  = \Theta ffl\Omega m\Lambda jmff\Pi %ffl*_$m%ffl_ae $\Upsilon fl)ss
-$\Theta ffl%ffi+ = \Theta ffl\Omega m\Lambda j,\Pi \Delta '\Gamma j%ffi+*$%\Pi \Omega ff\Lambda \Delta )ss
-`%\Phi ^\Delta *_pR- $\Phi \Upsilon  $\Theta ffl%ffi+".# $\Theta ffl%ffi+"/#0^_)ss
-i\Xi 
-!fiflffi\Upsilon ffl\Xi 
-!fi\Gamma \Delta \Theta \Lambda \Xi 
+The current implementation of OKWS supports only C++ for service development.
+OKWS programmers
 
 Figure 5: PHP version of the null service
 
@@ -701,28 +723,6 @@ the number of processes varied between 1 and 450. Weattribute the general declin
 context-switching, as shown in Figure 7. In the single-process configuration, the operating system must switch
 between the null service and okd, the demultiplexing dae-mon. In this configuration, higher client concurrency implies fewer switches, since both okd and the null servicehave more outstanding requests to service before calling
 
- 1800
- 1900
- 2000
- 2100
- 2200
- 2300
- 2400
- 2500
-
- 1  10  100
-req
-ues
-ts p
-er s
-eco
-nd
-
-number of processes (log scale)
-
-500 clients1000 clients
-2000 clients
-
 Figure 6: Throughputs achieved in the process pool test
 sleep. This effect quickly disappears as the server dis-tributes requests over more processes. As their numbers
 grow, each process has, on average, fewer requests toservice per unit of time, and therefore calls
@@ -748,54 +748,6 @@ Haboob is Java-based, and we compiled and ran it withFreeBSD's native JDK, versi
 v0.1a, built with F\Gamma  S\Delta \Theta S\Lambda \Xi \Delta  set high so that Flash re-ported an ability to service 5116 simultaneous connections. Also tested was Apache version 2.0.47 compiledwith multi-threading support and running PHP version
 4.3.3 as a dynamic shared object. We configured Apacheto handle up to 2000 concurrent connections. We ran
 OKWS in its standard configuration, with a one-to-one
-
- 3000
- 4000
- 5000
- 6000
- 7000
- 8000
- 9000
- 10000
-
- 1  10  100
-con
-tex
-t sw
-
-itch
-es p
-er s
-eco
-nd
-
-number of processes (log scale)
-
-500 clients1000 clients
-2000 clients
-
-Figure 7: Context switching in the process pool test
-
-200 500 1000 1500 20000
-500
-1000
-1500
-2000
-2500
-3000
-3500
-
-req
-ues
-ts p
-er s
-eco
-nd
-
-concurrent clients
-
-HaboobFlash
-Apache+PHPOKWS
 
 Figure 8: Throughputs for the single-service test
 correspondence between processes and services.We enabled HTTP access logging on all systems with
@@ -849,10 +801,6 @@ multi-threaded architecture is conducive to process isola-tion. Also, its extens
 make its security properties difficult to reason about.
 
 Haboob Apache Flash OKWS
-1 Service 490 895 1,590 2,401
-10 Services 225 760 1,232 2,089
-
-Change \Gamma 54.0% \Gamma 15.1% \Gamma 22.5% \Gamma 13.0%
 
 Table 2: Average throughputs in connections per second
 
@@ -914,7 +862,6 @@ contract #N66001-01-1-8927.
 
 Availability
 OKWS is available under an open source license at
-www\Gamma \Delta \Theta w\Lambda \Gamma \Delta \Xi \Pi .
 
 References
 
@@ -922,16 +869,6 @@ References
 
 management or, event-driven programming is not the opposite ofthreaded programming. In Proceedings of the 2002 USENIX,
 Monterey, CA, June 2002. USENIX.[2] Akamai Technologies, Inc.
-
-h\Sigma \Sigma \Upsilon \Phi \Psi \Psi \Omega \Omega \Omega fffiflfiffififflffijffi.[3] The Apache Software Foundation.
-
-h\Sigma \Sigma \Upsilon \Phi \Psi \Psi \Omega \Omega \Omega fffi\Upsilon fiih`ffj'^.[4] Apache Tutorial: Introduction to Server Side Includes.
-
-h\Sigma \Sigma \Upsilon \Phi \Psi \Psi h\Sigma \Sigma \Upsilon *fffi\Upsilon fiih`ffj'^\Psi *jic\Psi hj\Omega \Sigma j\Psi ccfflffh\Sigma ffit.[5] Bugtraq ID 4606. SecurityFocus.
-h\Sigma \Sigma \Upsilon \Phi \Psi \Psi \Omega \Omega \Omega ffc`i_'ffl\Sigma *,ji_cffijffi\Psi offl*\Psi 4ssaess\Psi ffl/,j\Psi .[6] Bugtraq ID 5993. SecurityFocus.
-h\Sigma \Sigma \Upsilon \Phi \Psi \Psi \Omega \Omega \Omega ffc`i_'ffl\Sigma *,ji_cffijffi\Psi offl*\Psi 5oeoeo/\Psi ffl/,j\Psi .[7] Bugtraq ID 7255. SecurityFocus.
-h\Sigma \Sigma \Upsilon \Phi \Psi \Psi \Omega \Omega \Omega ffc`i_'ffl\Sigma *,ji_cffijffi\Psi offl*\Psi 7AE55\Psi ffl/,j\Psi .[8] Bugtraq ID 8138. SecurityFocus.
-h\Sigma \Sigma \Upsilon \Phi \Psi \Psi \Omega \Omega \Omega ffc`i_'ffl\Sigma *,ji_cffijffi\Psi offl*\Psi 8OEo/8\Psi ffl/,j\Psi .[9] CERT
 
 RO/ Coordination Center. h\Sigma \Sigma \Upsilon \Phi \Psi \Psi \Omega \Omega \Omega ffi`'\Sigma ffj'^.
 [10] Open Market. Fastcgi. h\Sigma \Sigma \Upsilon \Phi \Psi \Psi \Omega \Omega \Omega ff,fic\Sigma i^fflffijffi.[11] R. Fielding, J. Gettys, J. Mogul, H. Frystyk, L. Masinter,
@@ -942,9 +879,6 @@ P. Leach, and T. Berners-Lee. Hypertext Transfer Protocol --HTTP/1.1. Internet N
 Springfi eld, VA, April 1995.[13] T. Gchwind and B. A. Schmit. CSE --a C++ servlet
 environment for high-performance web applications. InProceedings of the FREENIX Track: 2003 USENIX Technical
 Conference, San Antonio, TX, 2003. USENIX.[14] IBM corporation. IBM websphere application server.
-h\Sigma \Sigma \Upsilon \Phi \Psi \Psi \Omega \Omega \Omega ffffloffiffijffi.[15] JBoss Group.
-
-h\Sigma \Sigma \Upsilon \Phi \Psi \Psi \Omega \Omega \Omega ffojccffj'^.[16] M. F. Kaashoek, D. R. Engler, G. R. Ganger, H. M. Brice~no,
 
 R. Hunt, D. Mazi`eres, T. Pinckney, R. Grimm, J. Jannotti, andK. Mackenzie. Application performance and flexibility on
 exokernel systems. In Proceedings of the 16th ACM Symposiumon Operating Systems Principles, Saint-Malo, France, October
@@ -952,13 +886,6 @@ exokernel systems. In Proceedings of the 16th ACM Symposiumon Operating Systems 
 Proceedings of the 19th ACM Symposium on Operating SystemsPrinciples, Bolton Landing, NY, October 2003. ACM.
 [18] D. Mazi`eres. A toolkit for user-level fi le systems. InProceedings of the 2001 USENIX. USENIX, June 2001.
 [19] Microsoft Corporation. IIS. h\Sigma \Sigma \Upsilon \Phi \Psi \Psi \Omega \Omega \Omega ffffiffli'jcj,\Sigma ffijffi\Psi 
-
-\Omega ffl/*j\Omega cc`'!`'AEaeaeo/\Psi fflfflc\Psi *`,fi_t\Sigma ffffic\Upsilon x.[20] mod perl.
-
-h\Sigma \Sigma \Upsilon \Phi \Psi \Psi \Upsilon `'tfffi\Upsilon fiih`ffj'^.[21] MySQL.
-h\Sigma \Sigma \Upsilon \Phi \Psi \Psi \Omega \Omega \Omega ffffi*c"tffijffi.[22] OkCupid.com.
-
-h\Sigma \Sigma \Upsilon \Phi \Psi \Psi \Omega \Omega \Omega ffjfli_\Upsilon ffl*ffijffi.[23] V. S. Pai, P. Druschel, and W. Zwaenepoel. Flash: An effi cient
 
 and portable Web server. In Proceedings of the 1999 USENIX,Monterey, CA, June 1999. USENIX.
 [24] Perl DBI. h\Sigma \Sigma \Upsilon \Phi \Psi \Psi *offlff\Upsilon `'tffj'^.
@@ -970,12 +897,6 @@ Implementation (OSDI '02), Boston, MA, October 2002.USENIX.
 [27] J. H. Saltzer and M. D. Schroeder. The protection of informationin computer systems. In Proceedings of the IEEE, volume 63,
 
 1975.[28] SecurityFocus.
-
-h\Sigma \Sigma \Upsilon \Phi \Psi \Psi \Omega \Omega \Omega ffc`i_'ffl\Sigma *,ji_cffijffi.[29] Sleepycat Software.
-
-h\Sigma \Sigma \Upsilon \Phi \Psi \Psi \Omega \Omega \Omega ffct``\Upsilon *ifi\Sigma ffijffi.[30] The SparkMatch service. Previously available at
-
-h\Sigma \Sigma \Upsilon \Phi \Psi \Psi \Omega \Omega \Omega ff\Sigma h`c\Upsilon fi'flffijffi.[31] Standard performance evaluation corporation. the specweb99
 
 benchmark. h\Sigma \Sigma \Upsilon \Phi \Psi \Psi \Omega \Omega \Omega ffc\Upsilon `ioeoeffj'^\Psi jc^\Psi \Omega `ooeoe\Psi .[32] R. Srinivasan. RPC: Remote procedure call protocol
 specifi cation version 2. RFC 1831, Network Working Group,August 1995.
@@ -993,9 +914,6 @@ performance in the denali isolation kernel. In 5th Symposium onOperating Systems
 Boston, MA, October 2002. USENIX.[46] N. Zeldovich, A. Yip, F. Dabek, R. Morris, D. Mazi`eres, and
 F. Kaashoek. Multiprocessor support for event-driven programs.In Proceedings of the 2003 USENIX, San Antonio, TX, June
 2003. USENIX.[47] Zeus Technology Limited. Zeus Web Server.
-h\Sigma \Sigma \Upsilon \Phi \Psi \Psi \Omega \Omega \Omega ff#`_cffijff_fl.[48] The Zope Corporation.
-
-h\Sigma \Sigma \Upsilon \Phi \Psi \Psi \Omega \Omega \Omega ff#j\Upsilon `ffj'^.
 
 Notes
 
