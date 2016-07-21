@@ -167,60 +167,74 @@ operations, and vice versa, which avoids certain violations.
 This order can be generated from syntactic points in the TS stack code, allowing
 us to show that it is correct. 
 %This order can be generated from syntactic points in the TS stack code, 
-Our stack theorem is generic, not tied tothe TS stack. 
+% allowing us to show that it is correct.
+Our stack theorem is generic, not tied to the TS stack. 
+%Our stack theorem is generic, not tied to the TS stack. 
 By generalising away from linearization points, it paves the way for future
 concurrent data-structures whichweaken internal ordering.
+%By generlising away from linerization points, it paves the way for future
+% concurrent data structures which weaken internal ordering.
 
 Contribution. To summarise, our contributions are:
 
-* A new class of data-structure based on timestamping,realised as a stack,
+* A new class of data-structure based on timestamping, realised as a stack,
 queue, and deque.
 
-* A new optimisation strategy, interval timestamping,which exploits the weak
-ordering permitted by timestamped data-structures.* A new proof technique for
-establishing the linearizabilityof concurrent stacks, and a mechanisation of
-the core
 
-theorem in Isabelle.* A detailed application of this proof technique to showthat
-the TS stack is linearizable with respect to its sequential specification.*
-An experimental evaluation showing our TS stack out-performs the best existing
+* A new optimisation strategy, interval timestamping, which exploits the weak
+ordering permitted by timestamped data-structures.
+
+* A new proof technique for establishing the linearizability of concurrent
+stacks, and a mechanisation of the core
+theorem in Isabelle.
+
+* A detailed application of this proof technique to show that the TS stack is
+linearizable with respect to its sequential specification.
+
+* An experimental evaluation showing our TS stack out-performs the best existing
 concurrent stacks.
 
 Artifacts. We have produced two research artifacts:
 
-* The TS stack itself, implemented in C, along with queueand deque variants, and benchmark code used to test it.
+* The TS stack itself, implemented in C, along with queueand deque variants,
+and benchmark code used to test it.
 
 * The Isabelle mechanisation of our stack theorem.
-Both artifacts are included with the supplementary materialon the ACM digital library, and are also available from the
+Both artifacts are included with the supplementary materialon the ACM digital
+library, and are also available from the
 
 TS stack webpage:
 
-http://scal.cs.uni-salzburg.at/tsstack/
-
-Figure 2: The TS stack data-structure.
-Paper structure. $2 describes the key ideas behind theTS stack, then in $3 we describe the algorithm in detail. In
-
-$4 we describe our proof technique, while in $5 we use it toestablish that the TS stack is linearizable. In $6 we discuss
-our experiments. $7 discusses TS queue and deque variants.$8 surveys the related work. $9 concludes.
-
-Longer proofs and other auxiliary material are includedin supplementary appendices, available on the ACM digital
-library. Appendix A discusses the Isabelle proof of our corestack theorem. Appendix B gives further details about our
-TS stack linearizability proof. Appendix C gives a proof ofcorrectness for our intermediate TS buffer data-structure.
-
 2. Key Ideas
-Algorithm structure. The TS stack marks elements withtimestamps recording the order they were pushed. Elements are popped according to this timestamp order. Fig-ure 2 shows the stack's internal structure. Each thread
-
-T1-
-Tn which is accessing the stack has an associated single-producer multi-consumer pool, implemented as a linked list
-
-(we call these SP pools). These are linked from a commonarray spPools. Every element on the stack is stored in the
-SP pool of the thread that pushed it.Pushing to the TS stack involves (1) adding a node to
-the head of the thread's SP pool, (2) generating a newtimestamp, and (3) attaching the timestamp to the node.
-Thus un-timestamped nodes are visible to other threads -we write these in Figure 2 as the maximal value, !. As nodes
-are only added by one thread to each SP pool, elementsin a single pool are totally ordered by timestamp, and no
-synchronisation is needed when pushing.Popping from the TS stack involves (1) searching all the
-SP pools for an element with a maximal timestamp, and(2) attempting to remove it. This process repeats until an
-element is removed successfully. As each SP pool is ordered,searching only requires reading the head of each pool in turn.
+Algorithm structure. 
+The TS stack marks elements with timestamps recording the order they were
+pushed.
+Elements are popped according to this timestamp order.
+%The TS stack marks elements with timestamps recording the order they were
+% pushed.
+Fig-ure 2 shows the stack's internal structure. 
+Each thread T1-Tn which is accessing the stack has an associated
+single-producer multi-consumer pool, implemented as a linked list (we call
+these SP pools).
+%Tach thread T1-Tn which is accessing the stack has an associated
+% single-producer multi-consumer pool, implemented as a linked list (we call
+% these SPpools).
+These are linked from a common array spPools. 
+Every element on the stack is stored in the SP pool of the thread that pushed
+it.
+Pushing to the TS stack involves (1) adding a node to the head of the thread's
+SP pool, (2) generating a new timestamp, and (3) attaching the timestamp to the
+node.
+Thus un-timestamped nodes are visible to other threads we write these in Figure
+2 as the maximal value, !. 
+As nodes are only added by one thread to each SP pool, elements in a single pool
+are totally ordered by timestamp, and no synchronisation is needed when
+pushing.
+Popping from the TS stack involves (1) searching all the SP pools for an
+element with a maximal timestamp, and(2) attempting to remove it. 
+This process repeats until an element is removed successfully. 
+As each SP pool
+is ordered,searching only requires reading the head of each pool in turn.
 Timestamps in different pools may be mutually unordered- for example when two timestamps are equal. Thus more
 than one element may be maximal, and in this case, eithercan be chosen. To remove a node, the thread writes to a flag
 in the node marking it as taken. Multiple threads may tryto remove the same node, so an atomic compare-and-swap
@@ -236,29 +250,55 @@ avoid unnecessary increments by using a compare-and-swapto detect when the count
 We can avoid strong synchronisation entirely by using avector of thread-local counters, meaning the counter may
 stutter (many elements get the same timestamp). We canalso use a hardware timestamping operation - for example the RDTSCP instruction which is available on all modernx86 hardware. Our benchmarks show that hardware timestamping provides the best push performance. However, thepicture is more complicated in the presence of optimisation.
 See 6 for our experiments.
-Optimisations. Timestamping enables several optimisa-tions of the TS stack, most importantly elimination (a standard strategy in the literature), and interval timestamping(a contribution of this paper).
 
-In a stack, a concurrent push and pop can always soundlyeliminate each other, irrespective of the state of the stack [9].
-Therefore a thread can remove any concurrently insertedelement, not just the stack top. Unlike [9], our mechanism for
-detecting elimination exploits the existence of timestamps.We read the current time at the start of a pop; any element
-with a later timestamp has been pushed during the currentpop, and can be eliminated.
+Optimisations. 
+Timestamping enables several optimisa-tions of the TS stack, most importantly
+elimination (a standard strategy in the literature), and interval
+timestamping(a contribution of this paper).
+In a stack, a concurrent push and pop can always soundly eliminate each other,
+irrespective of the state of the stack [9].
+%In a stack, a concurrent push and pop can always  soundly eliminate each other,
+% irrespective of the state of the stack.
+Therefore a thread can remove any concurrently inserted element, not just the
+stack top. 
+%Therefore a thread can remove any concurrently inserted element, not just the
+% stack top.
 
-Surprisingly, it is not optimal to insert elements asquickly as possible. The reason is that removal is quicker
-when there are many unordered maximal elements, reduc-ing contention and avoiding failed CASes. To exploit this,
-we define timestamps as intervals, represented by a pairof start and end times. Overlapping interval timestamps
-are considered unordered, and thus there can be many topelements in the stack. To implement this, the algorithm includes a delay for a predetermined interval after generatinga start timestamp, then generates an end timestamp.
+Unlike [9], our mechanism for detecting elimination exploits the existence of
+timestamps. 
+%Unlike, our mechanism for detecting elimination exploits the existence of
+% timestamps.
+We read the current time at the start of a pop; any element with a
+later timestamp has been pushed during the current pop, and can be eliminated.
+%We read the current time at the start of a pop; any element with a later
+% timestamp has been pushed during the current pop, and can be eliminated.
 
-Pausing allows us to trade off the performance of pushand pop: an increasing delay in insertion can reduce the
-number of retries in pop (for evidence see 6.2). Thoughpausing may appear as an unnecessary overhead to a push,
-our experiments show that optimal delay times (4 us - 8 us)are actually shorter than e.g. an atomic fetch-and-inc on
-a contended memory location. By weakening the order ofstored elements, interval timestamping can substantially
-increase overall throughput and decrease the latency of pops.Similarly, although interval timestamping increases the
-non-determinism of removal (i.e. the variance in the or-der in which pushed elements are popped), this need not
-translate into greater overall non-determinism comparedto other high-performance stacks. A major source of nondeterminism in existing concurrent data-structures is in factcontention [7]. While interval timestamping increases the potential for non-determinism in one respect, it decreases it inanother.
+Surprisingly, it is not optimal to insert elements as quickly as possible. 
+%Surprisingly, it is not optimal to insert elements as quickly as possible.
+The reason is that removal is quicker when there are many unordered maximal
+elements, reduc-ing contention and avoiding failed CASes. 
+To exploit this, we define timestamps as intervals, represented by a pairof
+start and end times. Overlapping interval timestamps are considered unordered,
+and thus there can be many topelements in the stack. To implement this, the
+algorithm includes a delay for a predetermined interval after generatinga start
+timestamp, then generates an end timestamp.
 
-Performance vs. Elimination-Backoff stack. To thebest of our knowledge the Elimination-Backoff (EB) stack [9]
-is the fastest stack previously proposed. In our experiments(6.1) the TS stack configured with elimination and interval
-timestamping outperforms the EB stack by a factor of two.Several design decisions contribute to this success. The lack
+Pausing allows us to trade off the performance of pushand pop: an increasing
+delay in insertion can reduce the number of retries in pop (for evidence see
+6.2). Thoughpausing may appear as an unnecessary overhead to a push, our
+experiments show that optimal delay times (4 us - 8 us)are actually shorter
+than e.g. an atomic fetch-and-inc on a contended memory location. By weakening
+the order ofstored elements, interval timestamping can substantially increase
+overall throughput and decrease the latency of pops.Similarly, although
+interval timestamping increases the non-determinism of removal (i.e. the
+variance in the or-der in which pushed elements are popped), this need not
+translate into greater overall non-determinism comparedto other
+high-performance stacks. 
+A major source of nondeterminism in existing concurrent data-structures is in factcontention [7]. While interval timestamping increases the potential for non-determinism in one respect, it decreases it inanother.
+
+Performance vs. Elimination-Backoff stack. To thebest of our knowledge the
+Elimination-Backoff (EB) stack [9] is the fastest stack previously proposed. In
+our experiments(6.1) the TS stack configured with elimination and interval timestamping outperforms the EB stack by a factor of two.Several design decisions contribute to this success. The lack
 of insert-contention and mitigation of contention in the
 
 Figure 3: Non-LIFO behaviour forbidden by stack theorem.
