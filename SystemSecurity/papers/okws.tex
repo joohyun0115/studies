@@ -16,10 +16,13 @@ current systems.
 
 Most dynamic Web sites today maintain large server-side databases, to which
 their users have limited access via HTTP interfaces.
-%Most dynamic Web sites today maintain
+%Most dynamic Web sites today maintain large server-side databases, to which
+% their users have limited access via HTTP interfaces.
 Keeping this data hidden and correctis critical yet difficult. 
+%Keeping this data hidden and correctis critical yet difficult.
 Indeed, headlines are replete with stories of the damage and embarrassment
 remote attackers can visit on large Web sites.
+%
 
 Most attacks against Web sites exploit weaknesses inpopular Web servers or bugs
 in custom application-level logic. 
@@ -172,6 +175,7 @@ This isolation strategy is at odds with performance.
 If we assume that bugs like the ones discussed above are inevitable when
 building a large system, the best remedy is to limit the effectiveness of
 attacks when they occur.
+%If we assume that bugs like 
 This section presents four simple guidelines for protecting sensitive site data
 in the worst-case scenario, in which an adversary remotely gains control of a
 Web server and can execute arbitrary commands with the Web server's privileges.
@@ -198,14 +202,32 @@ ptrace and bindattacks mentioned in [17]).
 Privilege escalation is possible without executables but requires OS-level bugs
 or race conditions that are typically rarer.
 
-An adversary can still do damage without control ofthe Web server machine. The configuration files, source
-files, and binaries that correspond to the currently run-ning Web server contain valuable hints about how to access important data. For instance, PHP scripts often in-clude the username and plaintext password used to gain
-access to a MySQL database. OS-enforced policy oughtto hide these files from running Web servers.
+An adversary can still do damage without control of the Web server machine. 
+%An adversary can still do damage without control of the Web server machine.
+The configuration files, source files, and binaries that correspond to the
+currently run-ning Web server contain valuable hints about how to access
+important data. 
+%The configuration files, source files, and binaries that correspond to the
+% currently running Web server contain valuable hints about how to access
+% important data.
+For instance, PHP scripts often in-clude the username and plaintext password
+used to gain access to a MySQL database. 
+%For instance, PHP scripts often include the username and plaintext password
+% used to gain access to a MySQL database.
+OS enforced policy ought to hide these files from running Web servers.
+%OS enforced policy ought to hide these files from running Web servers.
 
-(2) Server processes should run as unprivileged users.A compromised process running as a privileged user can
-do significant damage even from within a chrooted en-vironment. It might bind to a well-known network port.
+Server processes should run as unprivileged users.
+%Server processes should run as unpriviledged users.
+A compromised process running as a privileged user can do significant damage
+even from within a chrooted en-vironment.
+%A compromised process running as a privileged user can do significant damage
+% even from within a chrooted environment.
+It might bind to a well-known network port.
+%It might bind to a well-known network port.
 It might also interfere with other system processes, espe-cially those associated with the Web server: it can trace
 their system calls or send them signals.
+It might also interfere
 
 (3) Server processes should have the minimal set ofdatabase access privileges necessary to perform their
 
