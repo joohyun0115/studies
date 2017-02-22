@@ -1,0 +1,123 @@
+# This is your sidebar TOC. The sidebar code loops through sections here and provides the appropriate formatting.
+
+entries:
+- title: sidebar
+  product: 
+  version: 
+  folders:
+
+  - title: Operating Systems
+    output: web, pdf
+    folderitems:
+
+    - title: File systems
+      url: /file_systems.html
+      output: web, pdf
+      type: web, pdf
+
+    - title: FS - Recovery
+      url: /fs_recovery.html
+      output: web, pdf
+      type: homepage
+
+      
+  - title: Concurrency and parallel computation
+    output: web, pdf
+    folderitems:
+
+    - title: 강의 설명
+      url: /mydoc_lecture_3_desc.html
+      output: web, pdf
+      type: web, pdf
+
+    - title: 강의 노트 
+      url: /mydoc_lecture_3_note.html
+      output: web, pdf
+      type: homepage
+
+  - title: Distributed Systems 
+    output: web, pdf
+    folderitems:
+
+    - title: 강의 설명
+      url: /mydoc_lecture_1_desc.html
+      output: web, pdf
+      type: web, pdf
+
+    - title: 강의 노트 
+      url: /mydoc_lecture_1_note.html
+      output: web, pdf
+      type: homepage
+      
+  - title: System security
+    output: web, pdf
+    folderitems:
+
+    - title: 강의 설명
+      url: /mydoc_lecture_2_desc.html
+      output: web, pdf
+      type: web, pdf
+
+    - title: 강의 노트 
+      url: /mydoc_lecture_2_note.html
+      output: web, pdf
+      type: homepage
+
+      
+      
+  - title: Networks and the Internet
+    output: web, pdf
+    folderitems:
+
+    - title: 강의 설명
+      url: /mydoc_lecture_3_desc.html
+      output: web, pdf
+      type: web, pdf
+
+    - title: 강의 노트 
+      url: /mydoc_lecture_3_note.html
+      output: web, pdf
+      type: homepage
+
+  - title: Client/Server architecture
+    output: web, pdf
+    folderitems:
+
+    - title: 강의 설명
+      url: /mydoc_lecture_3_desc.html
+      output: web, pdf
+      type: web, pdf
+
+    - title: 강의 노트 
+      url: /mydoc_lecture_3_note.html
+      output: web, pdf
+      type: homepage
+     
+     
+  - title: Embedded Systems
+    output: web, pdf
+    folderitems:
+
+    - title: 강의 설명
+      url: /mydoc_lecture_3_desc.html
+      output: web, pdf
+      type: web, pdf
+
+    - title: 강의 노트 
+      url: /mydoc_lecture_3_note.html
+      output: web, pdf
+      type: homepage 
+
+  - title: Deep Learning
+    output: web, pdf
+    folderitems:
+
+    - title: 강의 설명
+      url: /mydoc_lecture_3_desc.html
+      output: web, pdf
+      type: web, pdf
+
+    - title: 강의 노트 
+      url: /mydoc_lecture_3_note.html
+      output: web, pdf
+      type: homepage       
