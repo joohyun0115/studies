@@ -1,0 +1,23 @@
+# This is your sidebar TOC. The sidebar code loops through sections here and provides the appropriate formatting.
+
+entries:
+- title: sidebar
+  product: OS 
+  version: 
+  folders:
+
+  - title: O11perating Systems
+    output: web, pdf
+    folderitems:
+
+    - title: File systems
+      url: /file_systems.html
+      output: web, pdf
+      type: web, pdf
+
+    - title: FS - Recovery
+      url: /fs_recovery.html
+      output: web, pdf
+      type: homepage
+
+      

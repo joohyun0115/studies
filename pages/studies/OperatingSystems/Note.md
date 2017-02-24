@@ -1,7 +1,0 @@
-
-#
-
-** More Notation
-*** for all
-
-

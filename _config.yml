@@ -1,12 +1,12 @@
-repository: 경주현 컴퓨터 시스템 블로그
+repository: 경주현 컴퓨터 시스템 연구 노트
 
 output: web
 # this property is useful for conditional filtering of content that is separate from the PDF.
 
-topnav_title: 경주현 컴퓨터 시스템 블로그
+topnav_title: 경주현 컴퓨터 시스템 연구 노트 
 # this appears on the top navigation bar next to the home button
 
-site_title: 경주현 컴퓨터 시스템 블로그
+site_title: 경주현 컴퓨터 시스템 연구 노트
 # this appears in the html browser tab for the site title (seen mostly by search engines, not users)
 
 company_name: Kookmin Univ. 
@@ -62,11 +62,29 @@ kramdown:
 # collections are declared here. this renders the content in _tooltips and processes it, but doesn't output it as actual files in the output unless you change output to true
 
 defaults:
-
+  -
+    scope:
+      path: ""
+      type: "pages"
+    values:
+      layout: "page"
+      comments: true
+      search: true
+      sidebar: studies_sidebar
+  -
+    scope:
+      path: ""
+      type: "pages"
+    values:
+      layout: "page"
+      comments: true
+      search: true
+      sidebar: os_sidebar
 # these are defaults used for the frontmatter for these file types
 
 sidebars:
 - studies_sidebar
+- os_sidebar
 - other
 
 description: "Intended as a documentation theme based on Jekyll for technical writers documenting software and other technical products, this theme has all the elements you would need to handle multiple products with both multi-level sidebar navigation, tags, and other documentation features."
