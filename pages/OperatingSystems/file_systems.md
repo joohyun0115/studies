@@ -7,5 +7,4 @@ folder: OperatingSystems
 ---
 
 * 파일 시스템
-    * 파일 시스템은 뭐
-    
+    * 파일 시스템에서는 무엇이 중요한지 
