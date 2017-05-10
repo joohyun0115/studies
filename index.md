@@ -8,4 +8,4 @@ summary: 컴퓨터 시스템 관련 연구 노트
 
 ## 목적
 
-
+computer system 
